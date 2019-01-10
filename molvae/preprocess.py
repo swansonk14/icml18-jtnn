@@ -42,6 +42,8 @@ if __name__ == "__main__":
     parser.add_option("-j", "--jobs", dest="njobs", default=8)
     opts,args = parser.parse_args()
     opts.njobs = int(opts.njobs)
+    if opts.njobs == -1:
+        opts.njobs = None
 
     pool = Pool(opts.njobs)
     num_splits = int(opts.nsplits)
