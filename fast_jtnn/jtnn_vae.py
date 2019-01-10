@@ -4,14 +4,14 @@ from chemprop.parsing import add_train_args, modify_train_args
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mol_tree import Vocab, MolTree
-from nnutils import create_var, flatten_tensor, avg_pool
-from jtnn_enc import JTNNEncoder
-from jtnn_dec import JTNNDecoder
+from .mol_tree import Vocab, MolTree
+from .nnutils import create_var, flatten_tensor, avg_pool
+from .jtnn_enc import JTNNEncoder
+from .jtnn_dec import JTNNDecoder
 from chemprop.models.mpn import MPN
-from jtmpn import JTMPN
+from .jtmpn import JTMPN
 
-from chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols
+from .chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols
 import rdkit
 import rdkit.Chem as Chem
 import copy, math
@@ -167,7 +167,7 @@ class JTNNVAE(nn.Module):
         if len(cands) == 0:
             return None
 
-        cand_smiles,cand_amap = zip(*cands)
+        cand_smiles,cand_amap = list(zip(*cands))
         cands = [(smiles, all_nodes, cur_node) for smiles in cand_smiles]
 
         jtmpn_holder = JTMPN.tensorize(cands, y_tree_mess[1])
@@ -178,7 +178,7 @@ class JTNNVAE(nn.Module):
         _,cand_idx = torch.sort(scores, descending=True)
 
         backup_mol = Chem.RWMol(cur_mol)
-        for i in xrange(cand_idx.numel()):
+        for i in range(cand_idx.numel()):
             cur_mol = Chem.RWMol(backup_mol)
             pred_amap = cand_amap[cand_idx[i].item()]
             new_global_amap = copy.deepcopy(global_amap)
