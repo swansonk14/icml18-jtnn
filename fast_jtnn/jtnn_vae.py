@@ -42,6 +42,7 @@ class JTNNVAE(nn.Module):
         args.hidden_size = hidden_size
         args.depth = depthG
         self.mpn = MPN(args)
+        self.args = args
         # self.mpn = MPN(hidden_size, depthG)
 
         self.A_assm = nn.Linear(latent_size, hidden_size, bias=False)

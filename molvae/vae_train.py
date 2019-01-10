@@ -104,7 +104,8 @@ for epoch in trange(args.epoch):
 
         if total_step % args.save_iter == 0:
             # torch.save(model.state_dict(), args.save_dir + "/model.iter-" + str(total_step))
-            save_checkpoint(model.mpn, None, None, None, args.save_dir + "/model.iter-" + str(total_step))
+            model.encoder = model.mpn
+            save_checkpoint(model, None, None, None, args.save_dir + "/model.iter-" + str(total_step))
 
         if total_step % args.anneal_iter == 0:
             scheduler.step()
