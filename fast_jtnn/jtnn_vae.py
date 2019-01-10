@@ -37,7 +37,8 @@ class JTNNVAE(nn.Module):
 
         parser = ArgumentParser()
         add_train_args(parser)
-        args = parser.parse_args()
+        args = parser.parse_args(['--data_path', 'blah', '--dataset_type', 'regression'])
+        modify_train_args(args)
         args.hidden_size = hidden_size
         args.depth = depthG
         self.mpn = MPN(args)
