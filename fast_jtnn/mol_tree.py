@@ -1,7 +1,7 @@
 import rdkit
 import rdkit.Chem as Chem
 import copy
-from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
+from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
 
 def get_slots(smiles):
     mol = Chem.MolFromSmiles(smiles)
