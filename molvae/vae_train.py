@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../fast_jtnn')
+sys.path.append('../')
 
 import torch
 import torch.nn as nn
@@ -8,11 +8,12 @@ import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 
-import math, random, sys
+import math, random
 import numpy as np
 import argparse
 from collections import deque
 import pickle as pickle
+from tqdm import trange
 
 from fast_jtnn import *
 import rdkit
@@ -78,7 +79,7 @@ total_step = args.load_epoch
 beta = args.beta
 meters = np.zeros(4)
 
-for epoch in range(args.epoch):
+for epoch in trange(args.epoch):
     loader = MolTreeFolder(args.train, vocab, args.batch_size, num_workers=5)
     for batch in loader:
         total_step += 1

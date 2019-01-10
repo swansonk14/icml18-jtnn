@@ -37,7 +37,8 @@ class JTNNVAE(nn.Module):
 
         parser = ArgumentParser()
         add_train_args(parser)
-        args = parser.parse_args()
+        args = parser.parse_args(['--data_path', 'blah', '--dataset_type', 'regression'])
+        modify_train_args(args)
         args.hidden_size = hidden_size
         args.depth = depthG
         self.mpn = MPN(args)
@@ -71,7 +72,7 @@ class JTNNVAE(nn.Module):
         z_mol = torch.randn(1, self.latent_size).cuda()
         return self.decode(z_tree, z_mol)
 
-    def forward(self, smiles, x_batch, beta):
+    def forward(self, x_batch, beta):
         x_batch, x_jtenc_holder, x_mpn_holder, x_jtmpn_holder = x_batch
         x_tree_vecs, x_tree_mess, x_mol_vecs = self.encode(x_jtenc_holder, x_mpn_holder)
         z_tree_vecs,tree_kl = self.rsample(x_tree_vecs, self.T_mean, self.T_var)
