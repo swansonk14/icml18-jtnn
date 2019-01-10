@@ -6,7 +6,7 @@ from .nnutils import create_var, GRU
 from .chemutils import enum_assemble
 import copy
 
-MAX_NB = 15
+MAX_NB = 60
 MAX_DECODE_LEN = 100
 
 class JTNNDecoder(nn.Module):

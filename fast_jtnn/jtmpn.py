@@ -9,7 +9,7 @@ ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na', 'Ca', '
 
 ATOM_FDIM = len(ELEM_LIST) + 6 + 5 + 1
 BOND_FDIM = 5 
-MAX_NB = 15
+MAX_NB = 60
 
 def onek_encoding_unk(x, allowable_set):
     if x not in allowable_set:
@@ -117,7 +117,6 @@ class JTMPN(nn.Module):
             
             scope.append((total_atoms,n_atoms))
             total_atoms += n_atoms
-        
         total_bonds = len(all_bonds)
         fatoms = torch.stack(fatoms, 0)
         fbonds = torch.stack(fbonds, 0)
