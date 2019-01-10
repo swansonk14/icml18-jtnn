@@ -8,7 +8,7 @@ import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 
-import math, random
+import math, random, os
 import numpy as np
 import argparse
 from collections import deque
@@ -104,7 +104,7 @@ for epoch in trange(args.epoch):
 
         if total_step % args.save_iter == 0:
             # torch.save(model.state_dict(), args.save_dir + "/model.iter-" + str(total_step))
-            save_checkpoint(model.mpn, None, None, None, args.save_dir + "/model.iter-" + str(total_step))
+            save_checkpoint(os.path.join(args.save_dir, 'model.iter-{}'.format(total_step), model.mpn))
 
         if total_step % args.anneal_iter == 0:
             scheduler.step()
