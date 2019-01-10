@@ -43,7 +43,8 @@ class JTNNVAE(nn.Module):
 
     def encode(self, jtenc_holder, mpn_holder):
         tree_vecs, tree_mess = self.jtnn(*jtenc_holder)
-        mol_vecs = self.mpn(*mpn_holder)
+        mol_vecs = self.mpn(mpn_holder)
+        # mol_vecs = self.mpn(*mpn_holder)
         return tree_vecs, tree_mess, mol_vecs
 
     def rsample(self, z_vecs, W_mean, W_var):
