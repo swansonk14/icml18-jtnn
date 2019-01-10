@@ -123,16 +123,27 @@ class MolTree(object):
             node.assemble()
 
 if __name__ == "__main__":
-    import sys
-    lg = rdkit.RDLogger.logger() 
+    from argparse import ArgumentParser
+    from tqdm import tqdm
+
+    lg = rdkit.RDLogger.logger()
     lg.setLevel(rdkit.RDLogger.CRITICAL)
 
+    parser = ArgumentParser()
+    parser.add_argument('--data_path', type=str, required=True)
+    parser.add_argument('--save_path', type=str, required=True)
+    args = parser.parse_args()
+
+    with open(args.data_path) as f:
+        lines = f.readlines()
+
     cset = set()
-    for line in sys.stdin:
+    for line in tqdm(lines, total=len(lines)):
         smiles = line.split()[0]
         mol = MolTree(smiles)
         for c in mol.nodes:
             cset.add(c.smiles)
-    for x in cset:
-        print x
 
+    with open(args.save_path, 'w') as f:
+        for x in cset:
+            f.write(x + '\n')
