@@ -17,6 +17,7 @@ from tqdm import trange
 
 from fast_jtnn import *
 import rdkit
+from chemprop.utils import save_checkpoint
 
 lg = rdkit.RDLogger.logger() 
 lg.setLevel(rdkit.RDLogger.CRITICAL)
@@ -102,7 +103,8 @@ for epoch in trange(args.epoch):
             meters *= 0
 
         if total_step % args.save_iter == 0:
-            torch.save(model.state_dict(), args.save_dir + "/model.iter-" + str(total_step))
+            # torch.save(model.state_dict(), args.save_dir + "/model.iter-" + str(total_step))
+            save_checkpoint(model.mpn, None, None, None, args.save_dir + "/model.iter-" + str(total_step))
 
         if total_step % args.anneal_iter == 0:
             scheduler.step()
