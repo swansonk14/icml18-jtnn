@@ -1,3 +1,6 @@
+from argparse import ArgumentParser
+from chemprop.parsing import add_train_args, modify_train_args
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -5,7 +8,7 @@ from mol_tree import Vocab, MolTree
 from nnutils import create_var, flatten_tensor, avg_pool
 from jtnn_enc import JTNNEncoder
 from jtnn_dec import JTNNDecoder
-from mpn import MPN
+from chemprop.models.mpn import MPN
 from jtmpn import JTMPN
 
 from chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols
@@ -31,7 +34,14 @@ class JTNNVAE(nn.Module):
             self.decoder = JTNNDecoder(vocab, hidden_size, latent_size, nn.Embedding(vocab.size(), hidden_size))
 
         self.jtmpn = JTMPN(hidden_size, depthG)
-        self.mpn = MPN(hidden_size, depthG)
+
+        parser = ArgumentParser()
+        add_train_args(parser)
+        args = parser.parse_args()
+        args.hidden_size = hidden_size
+        args.depth = depthG
+        self.mpn = MPN(args)
+        # self.mpn = MPN(hidden_size, depthG)
 
         self.A_assm = nn.Linear(latent_size, hidden_size, bias=False)
         self.assm_loss = nn.CrossEntropyLoss(size_average=False)
@@ -60,7 +70,7 @@ class JTNNVAE(nn.Module):
         z_mol = torch.randn(1, self.latent_size).cuda()
         return self.decode(z_tree, z_mol)
 
-    def forward(self, x_batch, beta):
+    def forward(self, smiles, x_batch, beta):
         x_batch, x_jtenc_holder, x_mpn_holder, x_jtmpn_holder = x_batch
         x_tree_vecs, x_tree_mess, x_mol_vecs = self.encode(x_jtenc_holder, x_mpn_holder)
         z_tree_vecs,tree_kl = self.rsample(x_tree_vecs, self.T_mean, self.T_var)
