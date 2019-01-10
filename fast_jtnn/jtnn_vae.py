@@ -22,7 +22,7 @@ class JTNNVAE(nn.Module):
         super(JTNNVAE, self).__init__()
         self.vocab = vocab
         self.hidden_size = hidden_size
-        self.latent_size = latent_size = latent_size / 2 #Tree and Mol has two vectors
+        self.latent_size = latent_size = latent_size // 2 #Tree and Mol has two vectors
         self.share_embedding = share_embedding
 
         if share_embedding:
