@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../fast_jtnn')
+
 import torch
 import torch.nn as nn
 
