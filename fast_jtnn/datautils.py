@@ -109,7 +109,8 @@ def tensorize(tree_batch, vocab, assm=True):
     set_batch_nodeID(tree_batch, vocab)
     smiles_batch = [tree.smiles for tree in tree_batch]
     jtenc_holder,mess_dict = JTNNEncoder.tensorize(tree_batch)
-    mpn_holder = MPN.tensorize(smiles_batch)
+    mpn_holder = smiles_batch
+    # mpn_holder = MPN.tensorize(smiles_batch)
 
     if assm is False:
         return tree_batch, jtenc_holder, mpn_holder
