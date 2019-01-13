@@ -9,7 +9,7 @@ ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na', 'Ca', '
 
 ATOM_FDIM = len(ELEM_LIST) + 6 + 5 + 1
 BOND_FDIM = 5 
-MAX_NB = 15
+MAX_NB = 30
 
 def onek_encoding_unk(x, allowable_set):
     if x not in allowable_set:

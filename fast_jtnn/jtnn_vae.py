@@ -18,7 +18,7 @@ import copy, math
 
 class JTNNVAE(nn.Module):
 
-    def __init__(self, vocab, hidden_size, latent_size, depthT, depthG, share_embedding=False):
+    def __init__(self, vocab, hidden_size, latent_size, features_size, depthT, depthG, share_embedding=False):
         super(JTNNVAE, self).__init__()
         self.vocab = vocab
         self.hidden_size = hidden_size
@@ -34,6 +34,13 @@ class JTNNVAE(nn.Module):
             self.decoder = JTNNDecoder(vocab, hidden_size, latent_size, nn.Embedding(vocab.size(), hidden_size))
 
         self.jtmpn = JTMPN(hidden_size, depthG)
+
+        self.ffn = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, features_size)
+        )
+        self.prop_loss = nn.MSELoss()
 
         parser = ArgumentParser()
         add_train_args(parser)
@@ -73,17 +80,24 @@ class JTNNVAE(nn.Module):
         z_mol = torch.randn(1, self.latent_size).cuda()
         return self.decode(z_tree, z_mol)
 
-    def forward(self, x_batch, beta):
+    def forward(self, x_batch, beta, features):
         x_batch, x_jtenc_holder, x_mpn_holder, x_jtmpn_holder = x_batch
-        x_tree_vecs, x_tree_mess, x_mol_vecs = self.encode(x_jtenc_holder, x_mpn_holder)
-        z_tree_vecs,tree_kl = self.rsample(x_tree_vecs, self.T_mean, self.T_var)
+        # x_tree_vecs, x_tree_mess, x_mol_vecs = self.encode(x_jtenc_holder, x_mpn_holder)
+        x_mol_vecs = self.mpn(x_mpn_holder)  # wengong said just feeding this into the tree vecs would prob be ok
+        # z_tree_vecs,tree_kl = self.rsample(x_tree_vecs, self.T_mean, self.T_var)
         z_mol_vecs,mol_kl = self.rsample(x_mol_vecs, self.G_mean, self.G_var)
+        z_tree_vecs,tree_kl = z_mol_vecs,mol_kl
 
         kl_div = tree_kl + mol_kl
         word_loss, topo_loss, word_acc, topo_acc = self.decoder(x_batch, z_tree_vecs)
-        assm_loss, assm_acc = self.assm(x_batch, x_jtmpn_holder, z_mol_vecs, x_tree_mess)
+        # assm_loss, assm_acc = self.assm(x_batch, x_jtmpn_holder, z_mol_vecs, x_tree_mess)
+        assm_loss, assm_acc = 0, 0  # wengong suggested removing this as it's a computational bottleneck
+        prop_loss = self.prop(x_mol_vecs, features)  # should use the vecs from before or after sampling? TODO
 
-        return word_loss + topo_loss + assm_loss + beta * kl_div, kl_div.item(), word_acc, topo_acc, assm_acc
+        return word_loss + topo_loss + assm_loss + prop_loss + beta * kl_div, kl_div.item(), word_acc, topo_acc, assm_acc
+    
+    def prop(self, z_mol_vecs, features):
+        return self.prop_loss(self.ffn(z_mol_vecs), features)
 
     def assm(self, mol_batch, jtmpn_holder, x_mol_vecs, x_tree_mess):
         jtmpn_holder,batch_idx = jtmpn_holder

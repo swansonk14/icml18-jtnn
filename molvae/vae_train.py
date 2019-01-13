@@ -31,6 +31,7 @@ parser.add_argument('--load_epoch', type=int, default=0)
 parser.add_argument('--hidden_size', type=int, default=450)
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--latent_size', type=int, default=56)
+parser.add_argument('--features_path', type=str, default='/data/rsg/chemistry/yangk/icml18-jtnn/data/chembl/chembl_maxring8_semi.pckl')
 parser.add_argument('--depthT', type=int, default=20)
 parser.add_argument('--depthG', type=int, default=3)
 parser.add_argument('--share_embedding', action='store_true')
@@ -51,11 +52,17 @@ parser.add_argument('--save_iter', type=int, default=5000)
 
 args = parser.parse_args()
 print(args)
+
+with open(args.features_path, 'rb') as f:
+    features_dict = pickle.load(f) # dict mapping smiles to sparse 1 x n dimensional feature vectors
+for k in features_dict.keys(): # get features size
+    features_size = features_dict[k].shape[1]
+    break
   
 vocab = [x.strip("\r\n ") for x in open(args.vocab)] 
 vocab = Vocab(vocab)
 
-model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depthT, args.depthG, args.share_embedding).cuda()
+model = JTNNVAE(vocab, args.hidden_size, args.latent_size, features_size, args.depthT, args.depthG, args.share_embedding).cuda()
 print(model)
 
 for param in model.parameters():
@@ -86,7 +93,9 @@ for epoch in trange(args.epoch):
         total_step += 1
         try:
             model.zero_grad()
-            loss, kl_div, wacc, tacc, sacc = model(batch, beta)
+            _, _, batch_smiles, _ = batch
+            features = torch.from_numpy(np.stack([features_dict[s].todense() for s in batch_smiles])).float().cuda()
+            loss, kl_div, wacc, tacc, sacc = model(batch, beta, features)
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
             optimizer.step()
